@@ -1,0 +1,100 @@
+@import '../../common/stylus/mixin.styl'
+//左侧固定，右侧自适应布局
+.goods
+    position: absolute
+    top: 3.48rem
+    bottom: .92rem
+    width: 100%
+    display: flex
+    overflow: hidden
+    .menu-wrapper
+        flex: 0 0 1.6rem
+        width: 1.6rem
+        background-color: #f3f5f7
+        .menu-item
+            width: 1.12rem
+            height: 1.08rem
+            padding: 0 .24rem
+            display: table
+            line-height: .28rem
+            border-1px(rgba(7, 17, 27, 0.1))
+            &.current
+                position: relative
+                margin-top: -.02rem
+                z-index: 10
+                background: #fff
+                font-weight: 700
+                borer-none()
+            .icon
+                display: inline-block
+                width: .24rem
+                height .24rem
+                margin-right: .04rem
+                vertical-align: top
+                background-size: .24rem .24rem
+                background-repeat: no-repeat
+                &.decrease
+                    bg-image('decrease_3')
+                &.discount
+                    bg-image('discount_3')
+                &.guarantee
+                    bg-image('guarantee_3')
+                &.invoice
+                    bg-image('invoice_3')
+                &.special
+                    bg-image('special_3')
+            .text
+                display: table-cell
+                width: 1.12rem
+                vertical-align: middle
+                font-size: .24rem
+    .foods-wrapper
+        flex: 1
+        .title
+            height: .52rem
+            line-height: .52rem
+            padding-left: .28rem
+            font-size: .24rem
+            border-left: 2px solid #d9dde1
+            color: rgb(147, 153, 159)
+            background-color: #f3f5f7
+        .food-item
+            display: flex
+            margin: .36rem
+            padding-bottom: .36rem
+            border-1px(rgba(7, 17, 27, 0.1))
+            &.last-child
+                border-none()
+                margin-bottom: 0
+            .icon
+                flex: 0 0 57px
+                width:57px
+                margin-right: 10px
+            .content 
+                flex: 1
+                .name
+                    margin:2px 0 8px 0
+                    font-size: 14px 
+                    height:14px
+                    line-height: 14px
+                    color:rgb(7, 17, 27)
+                .desc, .extra
+                    font-size: 10px
+                    line-height: 12px
+                    color: rgb(147, 153, 159)
+                .desc
+                    margin-bottom: 8px
+                .extra
+                    .count
+                        margin-right: 12px
+                .price
+                    line-height:24px
+                    font-weight:700
+                    .now 
+                        font-size:14px
+                        margin-right: 8px
+                        color:rgb(240,20,20)
+                    .old
+                        text-decoration:line-through
+                        font-size: 10px
+                        color: rgb(147, 153, 159)
