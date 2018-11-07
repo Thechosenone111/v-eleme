@@ -12,53 +12,56 @@
         <router-link to="/seller">商家</router-link> 
       </div>
     </div>
-    <router-view></router-view>
+    <keep-alive>
+      <router-view :seller="seller"></router-view>
+    </keep-alive>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-  import header from "./components/header/header";
-  const ERR_OK = 0;
-  export default {
-    data(){
-      return {
-        seller:{}
-      } 
-    },
-    created() {
-      this.$http.get('/api/seller').then((response) =>{
-        response = response.body;
-        if(response.errno === ERR_OK){
-          this.seller = response.data;
-        }
-      })
-    },
-    components: {
-      "v-header": header
-    }
-  };
+import header from "./components/header/header";
+const ERR_OK = 0;
+export default {
+  data() {
+    return {
+      seller: {}
+    };
+  },
+  created() {
+    this.$http.get("/api/seller").then(response => {
+      response = response.body;
+      if (response.errno === ERR_OK) {
+        this.seller = response.data;
+      }
+    });
+  },
+  components: {
+    "v-header": header
+  }
+};
 </script>
 
 <style lang="stylus" rel="stylesheet/stylus">
-@import "common/stylus/mixin.styl";
+@import 'common/stylus/mixin.styl';
 
 /* 三等分flex布局 */
 .tab {
-  display: flex;
-  width: 100%;
-  height: .8rem;
-  line-height: .8rem;
-  border-1px(rgba(7,17,27,0.1));
+	display: flex;
+	width: 100%;
+	height: 0.8rem;
+	line-height: 0.8rem;
+	border-1px(rgba(7, 17, 27, 0.1));
 }
 
 .tab-item {
-  flex: 1;
-  display: block;
-  text-align: center;
-  font-size: .28rem;
-  color: rgb(77,85,93);
+	flex: 1;
+	display: block;
+	text-align: center;
+	font-size: 0.28rem;
+	color: rgb(77, 85, 93);
 }
+
 .tab-item .active {
-  color: rgb(240, 20, 20);
+	color: rgb(240, 20, 20);
 }
 </style>
