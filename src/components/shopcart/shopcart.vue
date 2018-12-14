@@ -1,26 +1,64 @@
 <template>
     <div class="shopcart">
-        <div class="content">
+        <div class="content" @click="toggleList">
             <div class="content-left">
                 <div class="logo-wrapper">
+                    <!-- 当数量大于0时，添加样式 -->
                     <div class="logo" :class="{'highlight':totalCount > 0}">
                         <i class="iconfont icon-gouwuche" :class="{'highlight': totalCount > 0}"></i>
                     </div>
+                    <!-- 左下角图标的数量 -->
+                    <!-- V-SHOW 购买商品时显示右上角图标 -->
                     <div v-show="totalCount > 0" class="num">{{totalCount}}</div>
                 </div>
                 <div class="price" :class="{'highlight': totalPrice > 0 }">￥{{totalPrice}}</div>
                 <div class="desc">另需配送费￥{{deliveryPrice}}元</div>
             </div>
-            <div class="content-right">
+            <div class="content-right" @click.stop.prevent="pay">
                 <div class="pay" :class="payClass">
                     {{payDesc}}
                 </div>
             </div>
         </div>
+        <div class="ball-content">
+            <div v-for="ball in balls">
+                <transition name="drop" @before-enter="beforeEnter" @enter="enter" @after-enter="afterEnter">
+                    <div v-show="ball.show" class="ball">
+                        <!-- inner-hook表示用来对js进行选择的 -->
+                        <div class="inner inner-hook"></div>
+                    </div>
+                </transition>
+            </div>
+        </div>
+        <transition name="fade">
+            <div class="shopcart-list" v-show="listshow">
+                <div class="list-header">
+                    <h1 class="title">购物车</h1>
+                    <span class="empty" @click="empty">清空</span>
+                </div>
+                <div class="list-content" ref="listContent">
+                    <ul>
+                        <li class="food" v-for="food in selectFoods">
+                            <span class="name">{{food.name}}</span>
+                            <div class="price">
+                                <span>￥{{food.price*food.count}}</span>
+                            </div>
+                            <div class="cartcontrol-wrapper">
+                                <cartcontrol :food="food"></cartcontrol>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </transition>
+        <transition name="fade">
+            <div class="list-mast" v-show="listshow" @click="hideList()"></div>
+        </transition>
     </div>
 </template>
 
 <script type="text/ecmascript-6">
+import cartcontrol from '../cartControl/cartControl'
 import BScroll from 'better-scroll'
     export default {
         props: {
@@ -38,6 +76,16 @@ import BScroll from 'better-scroll'
                 type: Number,
                 default: 0
             }
+        },
+        data(){
+            return {
+                balls:[{show:false},{show:false},{show:false},{show:false},{show:false},],
+                dropballs:[],
+                fold:true     //控制列表折叠状态
+            }
+        },
+        components:{
+            cartcontrol
         },
         computed:{
             totalPrice(){
@@ -65,14 +113,105 @@ import BScroll from 'better-scroll'
                 }
             },
             payClass() {
-                console.log(this.totalPrice)
-                    console.log(this.minPrice)
                 if(this.totalPrice < this.minPrice) {
                     return 'not-enough'
                 } else{
                     return 'enough'
                 }
             },
+            listshow() {
+                // 都没有选择无点击事件
+                if (!this.totalCount) {
+                    this.fold = true
+                    return false
+                }
+                let show = !this.fold
+                if(show) {
+                    this.$nextTick(() => { //数据变化后，DOM并没有立即生效，而BScroll严重依赖于DOM，所以使用nextTick
+                        if (!this.scroll) {
+                            this.scroll = new BScroll(this.$refs.listContent,{
+                                click: true
+                            })
+                        } else{
+                            this.scroll.refresh();
+                        }
+                    })
+                }
+                return show
+            }
+        },
+        methods:{
+            drop(el){
+                for(var i = 0; i < this.balls.length; i++ ){
+                    let ball = this.balls[i];
+                    if(!ball.show) {
+                        ball.show = true;
+                        ball.el = el;
+                        this.dropballs.push(ball);
+                        return;
+                    }
+                }
+            },
+            beforeEnter(el) {
+                //循环所有show为true的小球
+                let count = this.balls.length;
+                while (count--) {
+                    let ball = this.balls[count];
+                    //运动show为true的小球
+                    if(ball.show) {
+                        //获得元素相对于与视口的位置，left和right就是相对于视口的偏移
+                        let rect = ball.el.getBoundingClientRect();
+                        // 获得小球得偏移量
+                        let x = rect.left - 32;
+                        let y = -(window.innerHeight - rect.top - 22);
+                        //外层元素做一个纵向的动画
+                        el.style.display = '';
+                        el.style.webkitTransform = `translate3d(0,${y}px,0`;
+                        el.style.transform = `translate3d(0,${y}px,0`;
+                        //内层元素做横向运动的动画
+                        let inner = el.getElementsByClassName('inner-hook')[0];
+                        inner.style.webkitTransform = `translate3d(${x}px,0,0)`;
+                        inner.style.transform = `translate3d(${x}px,0,0)`;
+                    }
+                }
+            },
+            enter(el , done) {
+                this.$nextTick(() => {
+                    el.style.webkitTransform = 'translate3d(0,0,0)';
+                    el.style.transform = 'translate3d(0,0,0)';
+                    let inner = el.getElementsByClassName('inner-hook')[0];
+                    inner.style.webkitTransform = 'translate3d(0,0,0)';
+                    inner.style.transform = 'translate3d(0,0,0)';
+                    el.addEventListener('transitionend', done);
+                });
+            },
+            afterEnter(el) {
+                let ball = this.dropballs.shift();
+                if(ball) {
+                    ball.show = false;
+                    el.style.display = 'none';
+                }
+            },
+            toggleList() {
+                if(!this.totalCount) {
+                    return
+                }
+                this.fold = !this.fold
+            },
+            empty() {
+                this.selectFoods.forEach((food) => {
+                    food.count = 0
+                })
+            },
+            hideList() {
+                this.fold = true
+            },
+            pay() {
+                if(this.totalPrice < this.minPrice) {
+                    return
+                }
+                window.alert("需要支付" + this.totalPrice + "元")
+            }
         }
     }
 </script>

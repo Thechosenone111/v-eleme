@@ -14,9 +14,9 @@
                 <li v-for ="item in goods" class="food-list food-list-hook">
                     <h1 class="title">{{item.name}}</h1>
                     <ul>
-                        <li v-for ="food in item.foods" class="food-item border-1px">
+                        <li v-for ="food in item.foods" class="food-item border-1px" @click="selectFood(food,$event)">
                             <div class="icon">
-                                <img width="57" height="57" :src ="food.icon" alt="">
+                                <img style="width:1.14rem;height:1.14rem" :src ="food.icon" alt="">
                             </div>
                             <div class="content">
                                 <h2 class="name">{{food.name}}</h2>
@@ -28,7 +28,7 @@
                                     <span class="now">￥{{food.price}}</span><span class="old" v-show ="food.oldPrice">￥{{food.oldPrice}}</span>
                                 </div>
                                 <div class="cartcontrol-wrap">
-                                    <cartcontrol :food="food" @increament="incrementTotal"></cartcontrol>
+                                    <cartcontrol :food="food" @increment="incrementTotal"></cartcontrol>
                                 </div>
                             </div>
                         </li>
@@ -38,6 +38,7 @@
         </div>
         <div>
             <shopcart :select-foods="selectFoods" :delivery-price="seller.deliveryPrice" :min-price="seller.minPrice" ref="shopcart"></shopcart>
+            <food :food="selectedFood" ref="food"></food>
         </div>
     </div>
 </template>
@@ -46,6 +47,7 @@
 import BScroll from 'better-scroll'
 import shopcart from '../shopcart/shopcart'
 import cartcontrol from '../cartControl/cartControl'
+import food from '../food/food'
 export default {
     props:{
         seller:{
@@ -55,6 +57,7 @@ export default {
     components: {
         shopcart,
         cartcontrol,
+        food
     },
     data(){
         return {
@@ -150,6 +153,13 @@ export default {
         incrementTotal(target){
             //访问子组件的变量
             this.$refs.shopcart.drop(target) //shopcart 元素的drop事件，见shopcart
+        },
+        selectFood(food, event) {
+            if(!event._constructed) {
+                return
+            }
+            this.selectedFood = food
+            this.$refs.food.show()  //列表点击事件之后，显示food组件（调用food的show方法）
         }
     }
 };
